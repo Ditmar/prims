@@ -110,7 +110,7 @@ input[type="checkbox"] {
   color: #000;
 }
 #canvas1 {
-  width: 800px;
+  width: 60%;
   min-height: 550px;
   border: 1px solid #000;
   display: inline-block;

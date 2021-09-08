@@ -90,6 +90,7 @@
 
   Tangle.classes.TKNumberField = {
     initialize: function (element, options, tangle, variable) {
+      console.log("input");
       this.input = new Element("input", {
         type: "text",
         class: "TKNumberFieldInput",

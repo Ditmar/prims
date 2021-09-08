@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="examples.css" />
+    <script src="Tanglekit/js/jquery-2.1.1.js"></script>
+    <script src="Tanglekit/js/Tangle.js"></script>
+    <script src="Tanglekit/js/Plot.js"></script>
+    <script src="Tanglekit/js/Chart.min.js"></script>
+    <script src="Tanglekit/js/jquery.flot.js"></script>
+    <!-- TangleKit -->
+    <link rel="stylesheet" href="TangleKit/TangleKit.css" type="text/css" />
+    <script type="text/javascript" src="TangleKit/mootools.js"></script>
+    <script type="text/javascript" src="TangleKit/sprintf.js"></script>
+    <script type="text/javascript" src="TangleKit/BVTouchable.js"></script>
+    <script type="text/javascript" src="TangleKit/TangleKit.js"></script>
+    <script>
+      jQuery(document).ready(function ($) {
+        const model = {
+          initialize: function () {
+            this.numbers = 150000;
+          },
+          cribadeEratostenes: function (n) {
+            // Crea una matriz booleana "primo" e inicializa todas las entradas como true.
+            // Un valor en primo será finalmente false si i no es un primo (si no es verdadero).
+            let primo = [];
+            for (let i = 0; i < n; i++) primo[i] = true;
+
+            for (let p = 2; p * p <= n; p++) {
+              // Si el primo no cambia, entonces es primo
+              if (primo[p] == true) {
+                // Actualiza todos los múltiplos de p
+                for (let i = p * 2; i <= n; i += p) primo[i] = false;
+              }
+            }
+
+            // Imprimie todos los números primos
+            let c = 0;
+            for (let i = 2; i <= n; i++) {
+              if (primo[i] == true) c++;
+            }
+            return c;
+          },
+          //Beymar
+          testPrimes: function (x) {
+            let points = [];
+            let par_i, par_j;
+            let a, i, j, k, m, n, maxData, suma, nu, de;
+            a = Math.round((2 * x + Math.pow(-1, x) - 1) / 6);
+            n = a - 1;
+            m = Math.floor((-1 + Math.sqrt(-2 + 3 * a)) / 3);
+            suma = 0;
+            par_j = 1;
+            for (let j = 8; j <= n; j++) {
+              maxData = Math.floor((-1 + Math.sqrt(4 + 3 * j)) / 3);
+              k = 0;
+              par_i = 0;
+              points = [];
+              for (let i = 1; i <= m && i <= maxData; i++) {
+                if (par_i) {
+                  de = 3 * i + 1;
+                  if (par_j == 1) nu = j - i;
+                  else nu = j - 2 * i;
+                } else {
+                  de = 3 * i + 2;
+                  if (par_j == 1) nu = j - 2 * i - 1;
+                  else nu = j - i;
+                }
+                if (nu % de == 0 && -i + nu / de >= 0) {
+                  k = 1;
+                  break;
+                }
+                par_i = !par_i;
+                // points.push([i, nu]);
+              }
+              suma += k;
+
+              par_j = !par_j;
+            }
+            let p = Math.round(2 * x + Math.pow(-1, x) - 6 * suma + 5) / 6;
+            return [p, points];
+          },
+          update: function () {
+           
+            let tableResults = `<table><tr><th> Para x numeros </th> <th>Beymar (msec)</th> <th>Criba (msec)</th></tr></tr>`;
+            this.beymarTime = [];
+            this.cribaTime = [];
+            for (let i = 0; i <= this.numbers; i += 1000) {
+              const initTime = new Date().getTime();
+              let [result, points] = this.testPrimes(i);
+              const finishTime = new Date().getTime();
+              const cribaInitTime = new Date().getTime();
+              let count = this.cribadeEratostenes(i);
+              const cribaFisnishTime = new Date().getTime();
+              let difBeymar = (finishTime - initTime);
+              let difCriba = (cribaFisnishTime - cribaInitTime);
+              this.beymarTime.push([i, difBeymar]);
+              this.cribaTime.push([i, difCriba]);
+              tableResults += `<tr><td> para ${i}</td> <td>${difBeymar}</td> <td>${difCriba}</td></tr>`
+            }
+            tableResults += `</table>`;
+            $("#result").html(
+              tableResults
+            );
+            let options = {
+              color: "#ffffff",
+              series: {
+                lines: { show: true },
+                points: { show: false },
+              },
+              legend: {
+                show: true,
+                position: "ne",
+              },
+            };
+            $.plot("#canvas1", [{ data: this.cribaTime, label: "Criba msec" }, { data: this.beymarTime, label: "Beymar msec" }], options);
+            // $.plot("#canvas2", [{ data: this.points2, label: "Diferencia" }], options);
+            //$.plot("#canvas2", [{data : this.points, label:"Sol general"}], options);
+          },
+        };
+        const elemento = document.getElementById("visual");
+        new Tangle(elemento, model);
+      });
+    </script>
+  </head>
+
+  <body>
+    <h2>
+      Criba de Eratóstenes vs Formula de Beymar
+    </h2>
+    
+    <div id="visual">
+      <p>
+        Cálcula la velocidad de procesamiento en Milisegundos para un número x dado, donde prueba la formula encontrada por Beymar Lopez vs la Criba de Eratóstenes en este caso es evaluado para <span>
+          <span
+        data-var="numbers"
+        class="TKAdjustableNumber"
+        data-min="1000"
+        data-max="250000"
+        data-step="1000"
+      ></span>.
+        
+      </p>
+      Para un numero x  =
+      <span
+        data-var="numbers"
+        class="TKAdjustableNumber"
+        data-min="1000"
+        data-max="250000"
+        data-step="1000"
+      ></span>
+        
+    </div>
+
+    <div id="canvas1"></div>
+    <div id="result"></div>
+  </body>
+</html>
